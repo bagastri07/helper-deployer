@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -61,15 +60,15 @@ func deploy(cmd *cobra.Command, args []string) {
 	// Clone the current branch
 	fmt.Printf("Deployer: %s\n", gitName)
 	fmt.Printf("Repository: %s\n", repoName)
-	fmt.Println("Cloning branch:", branch)
-	err = runCommand("git", "clone", ".", branch)
+	fmt.Println("Creating branch:", branch)
+	err = runCommand("git", "checkout", "-b", branch)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Push the cloned branch to the remote git
+	// Push the branch to the remote git
 	fmt.Println("Pushing branch:", branch)
-	err = runCommand("git", "push", "origin", branch)
+	err = runCommand("git", "push", "-u", "origin", branch)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,16 +100,12 @@ func getGitUserName() string {
 }
 
 func getRepositoryName() string {
-	dir, err := os.Getwd()
+	cmd := exec.Command("git", "remote", "show", "origin")
+	output, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	repoPath := filepath.Join(dir, ".git")
-	repo, err := exec.Command("git", "--git-dir="+repoPath, "remote", "show", "origin").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return extractRepoName(string(repo))
+	return extractRepoName(string(output))
 }
 
 func extractRepoName(remoteOutput string) string {
