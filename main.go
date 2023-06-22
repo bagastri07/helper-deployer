@@ -57,6 +57,12 @@ func deploy(cmd *cobra.Command, args []string) {
 	// Generate branch name with timestamp
 	branch := generateBranchName(environment)
 
+	//get current branch
+	baseBranch, err := getCurrentBranch()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Clone the current branch
 	fmt.Printf("Deployer: %s\n", gitName)
 	fmt.Printf("Repository: %s\n", repoName)
@@ -68,12 +74,28 @@ func deploy(cmd *cobra.Command, args []string) {
 
 	// Push the branch to the remote git
 	fmt.Println("Pushing branch:", branch)
-	err = runCommand("git", "push", "-u", "origin", branch)
+	err = runCommand("git", "push", "origin", fmt.Sprintf("%s:%s", branch, branch))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = runCommand("git", "checkout", baseBranch)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Deployment completed successfully!")
+}
+
+func getCurrentBranch() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	branch := strings.TrimSpace(string(output))
+	return branch, nil
 }
 
 func isValidEnvironment(environment string) bool {
