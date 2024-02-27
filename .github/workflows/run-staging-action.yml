@@ -1,7 +1,7 @@
 name: Run staging action and delete branch
 
 on:
-  push:
+  create:
     branches:
       - 'staging/*'
 
