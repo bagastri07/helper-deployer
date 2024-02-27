@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -108,7 +107,7 @@ func isValidEnvironment(environment string) bool {
 }
 
 func generateBranchName(environment string) string {
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	timestamp := time.Now().Format("2006040722411421")
 	return environment + "-" + timestamp
 }
 
@@ -135,7 +134,8 @@ func extractRepoName(remoteOutput string) string {
 	for _, line := range lines {
 		if strings.Contains(line, "Fetch URL:") {
 			urlParts := strings.Split(line, "/")
-			return strings.TrimSpace(urlParts[len(urlParts)-1])
+			repoName := strings.TrimSpace(urlParts[len(urlParts)-1])
+			return strings.TrimSuffix(repoName, ".git")
 		}
 	}
 	return ""
@@ -143,7 +143,5 @@ func extractRepoName(remoteOutput string) string {
 
 func runCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }

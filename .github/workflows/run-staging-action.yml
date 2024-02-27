@@ -1,0 +1,28 @@
+name: Run staging action and delete branch
+
+on:
+  push:
+    branches:
+      - 'staging/*'
+
+jobs:
+  run-staging-action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Run your desired action here, replace with the action you want to run
+      - name: Run Staging Action
+        run: |
+          # Replace the command below with the command to execute your staging action
+          echo "Running staging action on branch $GITHUB_REF"
+
+      - name: Delete branch
+        run: |
+          # Extract branch name without prefix
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+
+          # Delete the branch
+          git push origin --delete $BRANCH_NAME
